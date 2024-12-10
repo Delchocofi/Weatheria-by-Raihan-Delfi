@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Temperatur dengan Grafik</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #3498db;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: 50%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #chartContainer {
+            margin-top: 30px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Kalkulator Temperatur</h1>
+        <p>Masukkan suhu awal (°C) dan perubahan suhu (ΔT):</p>
+        <input type="number" id="initialTemp" placeholder="Suhu awal (°C)" />
+        <input type="number" id="tempChange" placeholder="Perubahan suhu (ΔT)" />
+        <button onclick="calculateTemperature()">Hitung</button>
+        <div id="chartContainer">
+            <canvas id="temperatureChart"></canvas>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let chart;
+
+        function calculateTemperature() {
+            const initialTemp = parseFloat(document.getElementById('initialTemp').value);
+            const tempChange = parseFloat(document.getElementById('tempChange').value);
+
+            if (isNaN(initialTemp) || isNaN(tempChange)) {
+                alert('Masukkan nilai suhu yang valid.');
+                return;
+            }
+
+            // Hitung suhu akhir
+            const finalTemp = initialTemp + tempChange;
+
+            // Update grafik
+            updateChart(initialTemp, finalTemp);
+
+            // Tampilkan penjelasan kondisi
+            displayExplanation(finalTemp);
+        }
+
+        function updateChart(initialTemp, finalTemp) {
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+
+            if (chart) {
+                chart.destroy(); // Hapus grafik sebelumnya
+            }
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Suhu Awal', 'Suhu Akhir'],
+                    datasets: [{
+                        label: 'Temperatur (°C)',
+                        data: [initialTemp, finalTemp],
+                        backgroundColor: [
+                            initialTemp >= 30 ? 'red' : 'blue',
+                            finalTemp >= 30 ? 'red' : 'blue'
+                        ],
+                        borderColor: [
+                            initialTemp >= 30 ? 'darkred' : 'darkblue',
+                            finalTemp >= 30 ? 'darkred' : 'darkblue'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayExplanation(finalTemp) {
+            const resultDiv = document.getElementById('result');
+            let explanation = '';
+
+            if (finalTemp < 0) {
+                explanation = 'Temperatur sangat dingin. Kemungkinan pembentukan es atau salju di permukaan.';
+            } else if (finalTemp < 15) {
+                explanation = 'Temperatur dingin. Kondisi ini sering terjadi di daerah pegunungan atau musim dingin.';
+            } else if (finalTemp < 30) {
+                explanation = 'Temperatur sejuk hingga normal. Ini adalah kondisi nyaman untuk sebagian besar aktivitas.';
+            } else if (finalTemp < 40) {
+                explanation = 'Temperatur hangat. Kondisi ini sering terjadi di daerah tropis.';
+            } else {
+                explanation = 'Temperatur sangat panas. Risiko dehidrasi dan sengatan panas meningkat.';
+            }
+
+            resultDiv.textContent = `Kondisi: ${explanation}`;
+        }
+    </script>
+
+</body>
+</html>

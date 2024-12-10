@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Pembentukan Awan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #3498db;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            width: calc(100% - 22px);
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        #chartCanvas {
+            margin-top: 20px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+
+        .cloud {
+            position: absolute;
+            background: #f2f2f2;
+            border-radius: 50%;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            animation: float 5s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Kalkulator Pembentukan Awan</h1>
+        <p>Masukkan data untuk menghitung tinggi dasar awan dan melihat visualisasi:</p>
+        <input type="number" id="temperature" placeholder="Suhu permukaan (°C)" step="0.1" />
+        <input type="number" id="dewPoint" placeholder="Titik embun (°C)" step="0.1" />
+        <button onclick="calculateCloudBase()">Hitung</button>
+        <div class="result" id="result"></div>
+        <div id="chartContainer" style="position: relative; width: 500px; height: 300px; margin: 20px auto;">
+            <canvas id="chartCanvas" width="500" height="300"></canvas>
+            <div id="cloudContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateCloudBase() {
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const dewPoint = parseFloat(document.getElementById('dewPoint').value);
+
+            if (isNaN(temperature) || isNaN(dewPoint)) {
+                alert('Harap masukkan nilai suhu dan titik embun yang valid.');
+                return;
+            }
+
+            // Rumus tinggi dasar awan (LCL)
+            const cloudBase = (temperature - dewPoint) * 125; // dalam meter
+
+            // Pastikan tinggi dasar awan tidak melebihi 5000 meter
+            const maxCloudBase = Math.min(cloudBase, 5000);
+
+            // Konversi ke kilometer untuk hasil
+            const cloudBaseKm = (maxCloudBase / 1000).toFixed(2);
+
+            // Tampilkan hasil
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <strong>Tinggi dasar awan:</strong><br>
+                ${maxCloudBase.toFixed(2)} meter (${cloudBaseKm} km)
+            `;
+
+            // Tampilkan grafik dan animasi awan
+            drawChart(maxCloudBase);
+            showCloud(maxCloudBase);
+        }
+
+        function drawChart(cloudBase) {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Bersihkan canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Gambar sumbu Y (ketinggian)
+            ctx.beginPath();
+            ctx.moveTo(50, 10);
+            ctx.lineTo(50, 290);
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Gambar label sumbu Y
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "#333";
+            ctx.fillText("Ketinggian (m)", 10, 20);
+            for (let i = 0; i <= 5; i++) {
+                const height = i * 1000;
+                const y = 290 - (i * 58);
+                ctx.fillText(height, 5, y);
+            }
+
+            // Gambar indikator tinggi awan
+            ctx.fillStyle = "rgba(135, 206, 235, 0.5)";
+            const barHeight = (cloudBase / 5000) * 280;
+            ctx.fillRect(60, 290 - barHeight, 40, barHeight);
+        }
+
+        function showCloud(cloudBase) {
+            const cloudContainer = document.getElementById('cloudContainer');
+            cloudContainer.innerHTML = ''; // Hapus awan sebelumnya
+
+            // Buat elemen awan
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.width = '100px';
+            cloud.style.height = '60px';
+
+            // Hitung posisi vertikal awan berdasarkan tinggi dasar
+            const cloudPosition = 290 - (cloudBase / 5000) * 280;
+            cloud.style.top = `${cloudPosition}px`;
+            cloud.style.left = '150px'; // Posisikan horizontal di area grafik
+
+            cloudContainer.appendChild(cloud);
+        }
+    </script>
+
+</body>
+</html>

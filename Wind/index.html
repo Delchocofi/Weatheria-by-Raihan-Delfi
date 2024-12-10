@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Kecepatan Angin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #3498db;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: 50%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #windVisualization {
+            margin-top: 30px;
+            position: relative;
+            height: 200px;
+            width: 100%;
+            background-color: #e8f6ff;
+            overflow: hidden;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+        }
+
+        .windLine {
+            position: absolute;
+            height: 2px;
+            background-color: rgba(0, 0, 255, 0.5);
+            width: 100px;
+            animation: windAnimation 5s linear infinite;
+        }
+
+        @keyframes windAnimation {
+            to {
+                transform: translateX(100vw);
+            }
+        }
+
+        #chart-container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Kalkulator Kecepatan Angin</h1>
+        <p>Masukkan kecepatan angin (dalam km/jam):</p>
+        <input type="number" id="windSpeed" placeholder="Kecepatan angin" />
+        <button onclick="calculateWind()">Hitung Kecepatan Angin</button>
+        <p id="speedResult"></p>
+
+        <div id="windVisualization"></div>
+    </div>
+
+    <div id="chart-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Fungsi untuk menghitung kecepatan angin dan menampilkan visualisasi
+        function calculateWind() {
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+            if (isNaN(windSpeed) || windSpeed <= 0) {
+                alert('Masukkan kecepatan angin yang valid.');
+                return;
+            }
+
+            // Menampilkan kecepatan angin
+            document.getElementById('speedResult').textContent = `Kecepatan Angin: ${windSpeed} km/jam`;
+
+            // Visualisasi Gerakan Angin
+            const windVisualization = document.getElementById('windVisualization');
+            windVisualization.innerHTML = '';
+
+            const numLines = windSpeed; // Jumlah garis bergantung pada kecepatan angin
+            for (let i = 0; i < numLines; i++) {
+                createWindLine(windVisualization);
+            }
+
+            // Menampilkan grafik kecepatan angin
+            displayWindGraph(windSpeed);
+        }
+
+        // Membuat garis angin untuk visualisasi
+        function createWindLine(container) {
+            const windLine = document.createElement('div');
+            windLine.classList.add('windLine');
+            windLine.style.top = `${Math.random() * 100}%`; // Posisi vertikal acak
+            windLine.style.animationDuration = `${Math.random() * 2 + 2}s`; // Durasi acak untuk efek gerakan angin
+            container.appendChild(windLine);
+        }
+
+        // Menampilkan grafik kecepatan angin menggunakan Chart.js
+        function displayWindGraph(speed) {
+            const ctx = document.createElement('canvas');
+            document.getElementById('chart-container').innerHTML = ''; // Clear previous chart
+            document.getElementById('chart-container').appendChild(ctx);
+
+            const data = {
+                labels: ['0s', '1s', '2s', '3s', '4s', '5s'], // Waktu dalam detik
+                datasets: [{
+                    label: 'Kecepatan Angin (km/jam)',
+                    data: [0, speed, speed, speed, speed, speed], // Kecepatan konstan dalam grafik
+                    fill: false,
+                    borderColor: 'rgb(0, 123, 255)',
+                    tension: 0.1
+                }]
+            };
+
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: speed * 1.5
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, config);
+        }
+    </script>
+
+</body>
+</html>

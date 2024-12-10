@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Curah Hujan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #3498db;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: 50%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #visualization {
+            margin-top: 30px;
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background-color: #e8f6ff;
+            overflow: hidden;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+        }
+
+        .raindrop {
+            position: absolute;
+            top: -10px;
+            width: 5px;
+            height: 10px;
+            background-color: rgba(0, 0, 255, 0.7);
+            border-radius: 50%;
+            animation: fall 2s linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(300px);
+            }
+        }
+
+        #chartContainer {
+            margin-top: 30px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Kalkulator Curah Hujan</h1>
+        <p>Masukkan curah hujan (dalam mm/jam):</p>
+        <input type="number" id="rainfall" placeholder="Masukkan curah hujan" />
+        <button onclick="startRain()">Mulai Hujan</button>
+        <div id="visualization"></div>
+        <div id="chartContainer">
+            <canvas id="chartCanvas" width="500" height="300"></canvas>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Fungsi untuk membuat partikel curah hujan
+        function startRain() {
+            const rainfallAmount = parseFloat(document.getElementById('rainfall').value);
+
+            if (isNaN(rainfallAmount) || rainfallAmount <= 0) {
+                alert('Masukkan nilai curah hujan yang valid.');
+                return;
+            }
+
+            // Tampilkan hujan
+            showRainfall(rainfallAmount);
+
+            // Tampilkan grafik
+            drawChart(rainfallAmount);
+
+            // Tampilkan dampak curah hujan
+            showImpact(rainfallAmount);
+        }
+
+        function showRainfall(rainfallAmount) {
+            const numParticles = rainfallAmount * 10; 
+            const visualizationArea = document.getElementById('visualization');
+
+            visualizationArea.innerHTML = ''; // Hapus partikel sebelumnya
+
+            for (let i = 0; i < numParticles; i++) {
+                createRaindrop(visualizationArea);
+            }
+        }
+
+        function createRaindrop(visualizationArea) {
+            const raindrop = document.createElement('div');
+            raindrop.classList.add('raindrop');
+
+            // Posisi acak di area visualisasi
+            raindrop.style.left = `${Math.random() * 100}%`;
+            raindrop.style.animationDuration = `${Math.random() * 2 + 2}s`; // Durasi jatuh acak antara 2-4 detik
+
+            visualizationArea.appendChild(raindrop);
+
+            // Hapus partikel setelah jatuh
+            raindrop.addEventListener('animationend', () => {
+                raindrop.remove();
+            });
+        }
+
+        function drawChart(rainfallAmount) {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Bersihkan canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Skala curah hujan
+            const maxRainfall = 100; // Anggap 100 mm/jam sebagai maksimum untuk grafik
+            const barHeight = (rainfallAmount / maxRainfall) * canvas.height;
+
+            // Gambar grafik
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(50, canvas.height - barHeight, 100, barHeight);
+
+            // Label
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText(`Curah Hujan: ${rainfallAmount} mm/jam`, 200, canvas.height / 2);
+        }
+
+        function showImpact(rainfallAmount) {
+            const resultDiv = document.getElementById('result');
+
+            let impact = '';
+
+            if (rainfallAmount < 10) {
+                impact = 'Curah hujan rendah, tidak ada dampak signifikan.';
+            } else if (rainfallAmount < 50) {
+                impact = 'Curah hujan sedang. Berpotensi menyebabkan genangan di beberapa daerah.';
+            } else if (rainfallAmount < 100) {
+                impact = 'Curah hujan tinggi. Risiko banjir di daerah dataran rendah meningkat.';
+            } else {
+                impact = 'Curah hujan sangat tinggi! Potensi banjir besar dan tanah longsor.';
+            }
+
+            resultDiv.textContent = `Dampak: ${impact}`;
+        }
+    </script>
+
+</body>
+</html>
